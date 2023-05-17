@@ -1,12 +1,14 @@
 {
   "name": "onyxsio",
-  "displayName": "onyxsio",
+  "displayName": "Folder",
   "description": "Folder with bloc",
   "version": "0.0.1",
+  "license": "MIT",
+  "pricing": "Free",
   "publisher": "sudeshbandara",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sudeshnb/vscode-ex"
+    "url": "https://github.com/sudeshnb/vscode-ex.git"
   },
   "homepage": "https://sudeshnb.xyz",
   "engines": {
@@ -31,29 +33,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "onyxsio.new-feature-bloc",
-        "title": "New Feature: with Bloc"
-      },
-      {
-        "command": "onyxsio.new-feature-cubit",
-        "title": "New Feature: with Cubit"
+        "command": "onyxsio.new-feature",
+        "title": "new feature folder"
       },
       {
         "command": "onyxsio.new-core",
-        "title": "Hello cubit"
+        "title": "new core folder"
       }
     ]
   },
   "menus": {
     "explorer/context": [
       {
-        "command": "onyxsio.new-feature-bloc",
+        "command": "onyxsio.new-feature",
         "group": "cleanArchitectureGroup@1",
-        "when": "explorerResourceIsFolder"
-      },
-      {
-        "command": "onyxsio.new-feature-cubit",
-        "group": "cleanArchitectureGroup@2",
         "when": "explorerResourceIsFolder"
       },
       {

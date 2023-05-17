@@ -33,7 +33,26 @@ const openEquatableMigrationGuide = {
     );
   },
 };
-
+const openGetXMigrationGuide = {
+  name: "Open Migration Guide",
+  callback: () => {
+    env.openExternal(
+      Uri.parse(
+        "https://github.com/felangel/equatable/blob/master/doc/migration_guides/migration-0.6.0.md"
+      )
+    );
+  },
+};
+const openSizeMigrationGuide = {
+  name: "Open Migration Guide",
+  callback: () => {
+    env.openExternal(
+      Uri.parse(
+        "https://github.com/felangel/equatable/blob/master/doc//migration-0.6.0.md"
+      )
+    );
+  },
+};
 const deps = [
   { name: "angular_bloc", actions: [openBlocMigrationGuide] },
   { name: "bloc", actions: [openBlocMigrationGuide] },
@@ -43,6 +62,10 @@ const deps = [
   { name: "hydrated_bloc", actions: [openBlocMigrationGuide] },
   { name: "replay_bloc", actions: [openBlocMigrationGuide] },
   { name: "sealed_flutter_bloc", actions: [openBlocMigrationGuide] },
+  //flutter_screenutil
+  { name: "flutter_screenutil", actions: [openGetXMigrationGuide] },
+  { name: "get", actions: [openGetXMigrationGuide] },
+
 ];
 
 const devDeps = [{ name: "bloc_test", actions: [openBlocMigrationGuide] }];
@@ -54,13 +77,13 @@ export async function analyzeDependencies() {
 
   const pubspecLockDependencies = _.get(pubspecLock, "packages", {});
 
-  // checkForUpgrades(dependencies, pubspecLockDependencies);
-  // checkForUpgrades(devDependencies, pubspecLockDependencies);
+  checkForUpgrades(dependencies, pubspecLockDependencies);
+  checkForUpgrades(devDependencies, pubspecLockDependencies);
 }
 
 function checkForUpgrades(
   dependencies: Dependency[],
-  pubspecDependencies: object[]
+  pubspecDependencies: {}
 ) {
   for (let i = 0; i < dependencies.length; i++) {
     const dependency = dependencies[i];

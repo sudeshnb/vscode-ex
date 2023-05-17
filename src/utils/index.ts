@@ -9,3 +9,5 @@ export * from "./get-template-setting";
 export * from "./has-dependency";
 export * from "./update-pubspec-dependency";
 export * from "./wrap-with";
+
+export * from "./state-management-type";

@@ -10,7 +10,7 @@ export const getSelectedText = (editor: TextEditor): Selection => {
   );
   const language = editor.document.languageId;
  
-  if (language != "dart") {return emptySelection;}
+  if (language !== "dart") {return emptySelection;}
 
   const line = editor.document.lineAt(editor.selection.start);
   const lineText = line.text;

@@ -11,8 +11,9 @@ import {
   QuickPickOptions,
   Uri,
   window,
-  workspace
+  workspace,
 } from "vscode";
+
 import { existsSync, lstatSync, writeFile, appendFile } from "fs";
 import {
   getBlocEventTemplate,
@@ -20,9 +21,14 @@ import {
   getBlocTemplate,
   getCubitStateTemplate,
   getCubitTemplate,
+  getTemplatePath,
+  getTemplate,
+  CoreType,
+  getMainFileTemplate,
 } from "./templates";
 import { analyzeDependencies } from "./utils";
-import { getBlocType, BlocType, TemplateType } from "./utils";
+import { BlocType ,StateManagementType} from "./utils";
+import { type } from "os";
 
 
 export function activate (_context: ExtensionContext) {
@@ -30,20 +36,24 @@ export function activate (_context: ExtensionContext) {
   // if (workspace.getConfiguration("bloc").get<boolean>("checkForUpdates")) {
   analyzeDependencies();
   // }
-  commands.registerCommand("onyxsio.new-feature-bloc", async (uri: Uri) => {
-    mainCommand(uri, false);
+  commands.registerCommand("onyxsio.new-feature", async (uri: Uri) => {
+    mainCommand(uri);
   });
 
-  commands.registerCommand("onyxsio.new-feature-cubit", async (uri: Uri) => {
-    mainCommand(uri, true);
-  });
-  
+  // commands.registerCommand("onyxsio.new-feature-cubit", async (uri: Uri) => {
+  //   mainCommand(uri, true);
+  // });
+  // commands.registerCommand("onyxsio.new-feature-getx", async (uri: Uri) => {
+  //   mainCommand(uri, true);
+  // });
   commands.registerCommand("onyxsio.new-core", async (uri: Uri) => {
-    mainCommand(uri, true);
+    core(uri);
   });
 }
 
-export async function mainCommand (uri: Uri, useCubit: boolean) {
+// GETx
+
+export async function getxCommand (uri: Uri) {
   // Show feature prompt
   let featureName = await promptForFeatureName();
 
@@ -61,18 +71,17 @@ export async function mainCommand (uri: Uri, useCubit: boolean) {
     window.showErrorMessage('error: ${error}');
   }
 
-  // const blocType = await getBlocType(useCubit?TemplateType.Bloc:TemplateType.Cubit);
-  const blocType = await promptForUseEquatable();
+  const stateType = await promptForUseStateManagement();
 
-  const pascalCaseFeatureName = changeCase.pascalCase(
-    featureName.toLowerCase()
-  );
+  const blocType = await promptForUseEquatable();
+  const pascalCaseFeatureName = changeCase.pascalCase(featureName.toLowerCase());
+  
   try {
     await generateFeatureArchitecture(
       `${featureName}`,
       targetDirectory,
       blocType,
-      useCubit
+    stateType,
     );
     window.showInformationMessage(
       `Successfully Generated ${pascalCaseFeatureName} Feature`
@@ -85,6 +94,67 @@ export async function mainCommand (uri: Uri, useCubit: boolean) {
   }
 }
 
+
+
+
+
+
+
+export async function mainCommand (uri: Uri) {
+  // Show feature prompt
+  let featureName = await promptForFeatureName();
+
+  // Abort if name is not valid
+  if (!isNameValid(featureName)) {
+    window.showErrorMessage("The feature name must not be empty.");
+    return;
+  }
+  featureName = `${featureName}`;
+
+  let targetDirectory = "";
+  try {
+    targetDirectory = await getTargetDirectory(uri);
+  } catch (error) {
+    window.showErrorMessage('error: ${error}');
+  }
+  const stateType = await promptForUseStateManagement();
+  // const blocType = await getBlocType(useCubit?TemplateType.Bloc:TemplateType.Cubit);
+  
+  
+ const blocType = await promptForUseBloc(stateType);
+
+ 
+ 
+  const pascalCaseFeatureName = changeCase.pascalCase(featureName.toLowerCase()
+  );
+  try {
+    await generateFeatureArchitecture(
+      `${featureName}`,
+      targetDirectory,
+      blocType,
+      stateType
+    );
+    window.showInformationMessage(
+      `Successfully Generated ${pascalCaseFeatureName} Feature`
+    );
+  } catch (error) {
+    window.showErrorMessage(
+      `Error:
+        ${error instanceof Error ? error.message : JSON.stringify(error)}`
+    );
+  }
+}
+async function promptForUseBloc(stateType:StateManagementType) :Promise<BlocType>{
+  switch (stateType) {
+    case StateManagementType.getx:
+      return BlocType.Simple;
+    case StateManagementType.bloc:
+    case StateManagementType.cubit:
+      return await promptForUseEquatable();
+    default:
+      return BlocType.Simple;
+   }
+}
 export function isNameValid (featureName: string | undefined): boolean {
   // Check if feature name exists
   if (!featureName) {
@@ -100,8 +170,11 @@ export function isNameValid (featureName: string | undefined): boolean {
 
 export async function getTargetDirectory (uri: Uri): Promise<string> {
   let targetDirectory;
+
+
   if (_.isNil(_.get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
-    targetDirectory = await promptForTargetDirectory();
+    // targetDirectory = await promptForTargetDirectory();
+    targetDirectory = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/src`);
     if (_.isNil(targetDirectory)) {
       throw Error("Please select a valid directory");
     }
@@ -113,20 +186,44 @@ export async function getTargetDirectory (uri: Uri): Promise<string> {
   return targetDirectory;
 }
 
-export async function promptForTargetDirectory (): Promise<string | undefined> {
-  const options: OpenDialogOptions = {
-    canSelectMany: false,
-    openLabel: "Select a folder to create the feature in",
-    canSelectFolders: true,
+export async function promptForUseStateManagement ():  Promise<StateManagementType> {
+  const usePromptValues: string[] = ["no (default)", "Cubit", "Bloc","GetX"];
+  const usePromptOptions: QuickPickOptions = {
+    placeHolder:
+      "Do you want to use the State Management Package in bloc to override equality comparisons?",
+    canPickMany: false,
   };
 
-  return window.showOpenDialog(options).then((uri) => {
-    if (_.isNil(uri) || _.isEmpty(uri)) {
-      return undefined;
-    }
-    return uri[0].fsPath;
-  });
+  const answer = await window.showQuickPick(
+    usePromptValues,
+    usePromptOptions
+  );
+
+  switch (answer) {
+    case "Cubit":
+      return StateManagementType.cubit;
+    case "Bloc":
+      return StateManagementType.bloc;
+    case "GetX":
+        return StateManagementType.getx;
+    default:
+      return StateManagementType.simple;
+  }
 }
+// export async function promptForTargetDirectory (): Promise<string | undefined> {
+//   const options: OpenDialogOptions = {
+//     canSelectMany: false,
+//     openLabel: "Select a folder to create the feature in",
+//     canSelectFolders: true,
+//   };
+
+//   return window.showOpenDialog(options).then((uri) => {
+//     if (_.isNil(uri) || _.isEmpty(uri)) {
+//       return undefined;
+//     }
+//     return uri[0].fsPath;
+//   });
+// }
 
 export function promptForFeatureName (): Thenable<string | undefined> {
   const blocNamePromptOptions: InputBoxOptions = {
@@ -157,7 +254,6 @@ export async function promptForUseEquatable ():  Promise<BlocType> {
     default:
       return BlocType.Simple;
   }
-  // return answer === "yes (advanced)";
 }
 
 async function generateBlocCode (
@@ -197,7 +293,7 @@ export async function generateFeatureArchitecture (
   featureName: string,
   targetDirectory: string,
   type: BlocType,
-  useCubit: boolean
+  state: StateManagementType,
 ) {
   // Create the features directory if its does not exist yet
   const featuresDirectoryPath = getFeaturesDirectoryPath(targetDirectory);
@@ -230,19 +326,42 @@ export async function generateFeatureArchitecture (
     featureDirectoryPath,
     "Presentation"
   );
+  const whatStateManagementType = await stateNameFind(state);
   await createDirectories(presentationDirectoryPath, [
-    useCubit ? "Cubit" : "Bloc",
+    whatStateManagementType,
     "Pages",
     "Widgets",
   ]);
     
   // Generate the bloc code in the presentation layer
-  
-  useCubit
-    ? await generateCubitCode(featureName, presentationDirectoryPath, type)
-    : await generateBlocCode(featureName, presentationDirectoryPath, type);
+  switch (state) {
+    case StateManagementType.bloc:
+      return await generateBlocCode(featureName, presentationDirectoryPath, type);
+    case StateManagementType.cubit:
+      return await generateCubitCode(featureName, presentationDirectoryPath, type);
+    case StateManagementType.getx:
+      return "GetX";
+    default:
+      return "";
+  }
+  // useCubit
+  //   ? await generateCubitCode(featureName, presentationDirectoryPath, type)
+  //   : await generateBlocCode(featureName, presentationDirectoryPath, type);
 }
 
+
+async function stateNameFind(type:StateManagementType): Promise<string > {
+  switch (type) {
+    case StateManagementType.bloc:
+      return "Bloc";
+    case StateManagementType.cubit:
+      return "Cubit";
+    case StateManagementType.getx:
+      return "GetX";
+    default:
+      return "";
+  }
+}
 export function getFeaturesDirectoryPath (currentDirectory: string): string {
   // Split the path
   const splitPath = currentDirectory.split(path.sep);
@@ -418,3 +537,162 @@ function createCubitTemplate (
     );
   });
 }
+///
+
+
+export async function core (uri: Uri) {
+	// Abort if name is not valid
+	let targetDirectory = "";
+  try {
+    // targetDirectory = await getTargetDirectory(uri);
+    // window.showInformationMessage(workspace.workspaceFolders?.find);
+    targetDirectory = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/src`);
+
+  } catch (error) {
+    window.showErrorMessage(`error.message ${error}`);
+  }
+  try {
+    await generateCoreArchitecture(targetDirectory);
+    
+  } catch (error) {
+    window.showErrorMessage(
+      `Error:
+        ${error instanceof Error ? error.message : JSON.stringify(error)}`
+    );
+  }
+}
+
+export async function generateCoreArchitecture (targetDirectory: string) {
+
+// Create the features directory if its does not exist yet
+const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
+
+		if (!existsSync(coreDirectoryPath)) {
+		await createDirectories(coreDirectoryPath, [
+			"Animation",
+			"Api",
+			"Config",
+			"Constants",
+			"Keys",
+			"Error",
+      "Network",
+			"Routes",
+			"Theme",
+			"Utils",
+			"Usecases",
+			"Widgets",
+			"Localization",
+			"Middleware",
+      'Global'
+			]);	
+      await Promise.all([
+        // createRoutesTemplate(coreDirectoryPath),
+        createTemplateFile(CoreType.animation,coreDirectoryPath),
+        createTemplateFile(CoreType.api,coreDirectoryPath),
+        createTemplateFile(CoreType.config,coreDirectoryPath),
+        /// 
+        createTemplateFile(CoreType.injection,coreDirectoryPath),
+        createTemplateFile(CoreType.keyboard,coreDirectoryPath),
+        createTemplateFile(CoreType.root,coreDirectoryPath),
+        ///
+        createTemplateFile(CoreType.constants,coreDirectoryPath),
+        ///
+        createTemplateFile(CoreType.color,coreDirectoryPath),
+        createTemplateFile(CoreType.icon,coreDirectoryPath),
+        createTemplateFile(CoreType.textStyle,coreDirectoryPath),
+        ///
+        createTemplateFile(CoreType.keys,coreDirectoryPath),
+        createTemplateFile(CoreType.error,coreDirectoryPath),
+        createTemplateFile(CoreType.network,coreDirectoryPath),
+        createTemplateFile(CoreType.routes,coreDirectoryPath),
+        ///
+        createTemplateFile(CoreType.routeName,coreDirectoryPath),
+        createTemplateFile(CoreType.routePage,coreDirectoryPath),
+        ///
+        createTemplateFile(CoreType.theme,coreDirectoryPath),
+        createTemplateFile(CoreType.usecases,coreDirectoryPath),
+        createTemplateFile(CoreType.utils,coreDirectoryPath),
+        createTemplateFile(CoreType.widgets,coreDirectoryPath),
+        createTemplateFile(CoreType.localization,coreDirectoryPath),
+        createTemplateFile(CoreType.middleware,coreDirectoryPath),
+        createTemplateFile(CoreType.global,coreDirectoryPath),
+        //
+        createMainFileTemplate(targetDirectory),
+     
+      ]);
+			window.showInformationMessage(`Successfully Generated Core Folder.`);
+		}
+		else{
+			window.showErrorMessage(`Error: Already Generated Core Folder!.`);
+			return;
+		}
+	
+  }
+
+export function getCoreDirectoryPath (currentDirectory: string): string {
+    // Split the path
+    const splitPath = currentDirectory.split(path.sep);
+    // Remove trailing \
+    if (splitPath[splitPath.length - 1] === "") {
+      splitPath.pop();
+    }
+    // Rebuild path
+    const result = splitPath.join(path.sep);
+    
+    // If already return the current directory if not, return the current directory with the /features append to it
+    return  path.join(result, "Core");
+    }
+
+
+
+
+async function  createTemplateFile (type: CoreType, dir: string) {
+      
+      const targetDir = await getTemplatePath(type,dir);
+
+      const data = await getTemplate(type);
+
+      if (existsSync(targetDir)) {
+        throw Error(`File already exists`);
+      }
+      return new Promise(async (resolve, reject) => {
+        writeFile(
+          targetDir,
+          data,
+          "utf8",
+          (error) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(true);
+          }
+        );
+      });
+    }
+
+async function  createMainFileTemplate (dir: string) {
+      
+      // const targetPath = `${dir}/main.dart`;
+
+      const targetPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/main.dart`);
+
+      if (!existsSync(targetPath)) {
+        throw Error(`File is not find!`);
+      }
+      return new Promise(async (resolve, reject) => {
+        writeFile(
+          targetPath,
+          getMainFileTemplate(),
+          "utf8",
+          (error) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(true);
+          }
+        );
+      });
+    }
+
