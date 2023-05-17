@@ -1,0 +1,103 @@
+{
+  "name": "onyxsio",
+  "displayName": "onyxsio",
+  "description": "Folder with bloc",
+  "version": "0.0.1",
+  "publisher": "sudeshbandara",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sudeshnb/bloc"
+  },
+  "homepage": "https://sudeshnb.xyz",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "categories": [
+    "Snippets",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "dart",
+    "flutter",
+    "angulardart",
+    "bloc",
+    "state-management"
+  ],
+  "activationEvents": [
+    "onCommand:extension.new-bloc",
+    "workspaceContains:**/pubspec.yaml"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "onyxsio.new-feature-bloc",
+        "title": "New Feature: with Bloc"
+      },
+      {
+        "command": "onyxsio.new-feature-cubit",
+        "title": "New Feature: with Cubit"
+      },
+      {
+        "command": "onyxsio.new-core",
+        "title": "Hello cubit"
+      }
+    ]
+  },
+  "menus": {
+    "explorer/context": [
+      {
+        "command": "onyxsio.new-feature-bloc",
+        "group": "cleanArchitectureGroup@1",
+        "when": "explorerResourceIsFolder"
+      },
+      {
+        "command": "onyxsio.new-feature-cubit",
+        "group": "cleanArchitectureGroup@2",
+        "when": "explorerResourceIsFolder"
+      },
+      {
+        "command": "onyxsio.new-core",
+        "title": "Hello cubit",
+        "when": "explorerResourceIsFolder"
+      }
+    ]
+  }
+,
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.78.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.39.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.81.0",
+    "webpack-cli": "^5.0.2"
+  },
+  "dependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/lodash": "^4.14.194",
+    "@types/mkdirp": "^0.5.1",
+    "change-case": "^4.1.2",
+    "lodash": "^4.17.21",
+    "mkdirp": "^0.5.6",
+    "node-fetch": "^3.3.1"
+  }
+}
