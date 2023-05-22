@@ -1,8 +1,8 @@
 {
   "name": "onyxsio",
-  "displayName": "Folder",
-  "description": "Folder with bloc",
-  "version": "0.0.1",
+  "displayName": "Clean Architecture",
+  "description": "Folder Create with bloc, getx",
+  "version": "1.0.1",
   "license": "MIT",
   "pricing": "Free",
   "publisher": "sudeshbandara",
@@ -34,11 +34,11 @@
     "commands": [
       {
         "command": "onyxsio.new-feature",
-        "title": "new feature folder"
+        "title": "New Feature: folder"
       },
       {
         "command": "onyxsio.new-core",
-        "title": "new core folder"
+        "title": "New Core: folder"
       }
     ]
   },

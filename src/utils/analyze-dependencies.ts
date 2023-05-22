@@ -71,7 +71,9 @@ const deps = [
 const devDeps = [{ name: "bloc_test", actions: [openBlocMigrationGuide] }];
 
 export async function analyzeDependencies() {
+  
   const dependencies = await getDependencies(deps);
+ 
   const devDependencies = await getDependencies(devDeps);
   const pubspecLock = await getPubspecLock();
 
@@ -145,6 +147,5 @@ async function getDependencies(
       };
     }
   );
-
   return Promise.all(futures);
 }

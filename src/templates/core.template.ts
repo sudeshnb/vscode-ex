@@ -11,7 +11,7 @@ export const enum CoreType {
     textStyle,
 	keys,
 	error,
-    network,
+    services,
 	routes,
     routeName,
     routePage,
@@ -50,8 +50,8 @@ export const enum CoreType {
           return `${dir}/Keys/keys.dart`;
         case CoreType.error:
             return `${dir}/Error/error.dart`;
-        case CoreType.network:
-            return `${dir}/Network/network.dart`;
+        case CoreType.services:
+            return `${dir}/Services/services.dart`;
         case CoreType.routes:
             return `${dir}/Routes/routes.dart`;
         case CoreType.routeName:
@@ -105,7 +105,7 @@ export async function getTemplate(type: CoreType): Promise<NodeJS.ArrayBufferVie
           return getKeysTemplate();
         case CoreType.error:
             return getErrorTemplate();
-        case CoreType.network:
+        case CoreType.services:
             return getNetworkTemplate();
         case CoreType.routes:
             return getRoutesTemplate();
@@ -165,7 +165,7 @@ function getErrorTemplate(): NodeJS.ArrayBufferView | string {
   }
 // 
 function getNetworkTemplate(): NodeJS.ArrayBufferView | string {
-    return `library network;`;
+    return `library services;`;
   }
 // 
 function getThemeTemplate(): NodeJS.ArrayBufferView | string {
@@ -315,7 +315,7 @@ export function getMainFileTemplate(): NodeJS.ArrayBufferView | string {
     `;
 }
 //
- function getRootAppTemplate(): NodeJS.ArrayBufferView | string {
+export function getRootAppTemplate(): NodeJS.ArrayBufferView | string {
     return ` 
     import 'keyboard.dart';
     import 'package:flutter/material.dart';

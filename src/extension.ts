@@ -25,6 +25,7 @@ import {
   getTemplate,
   CoreType,
   getMainFileTemplate,
+  getRootAppTemplate,
 } from "./templates";
 import { analyzeDependencies } from "./utils";
 import { BlocType ,StateManagementType} from "./utils";
@@ -33,11 +34,13 @@ import { type } from "os";
 
 export function activate (_context: ExtensionContext) {
   // analyzeDependencies();
-  // if (workspace.getConfiguration("bloc").get<boolean>("checkForUpdates")) {
   analyzeDependencies();
-  // }
+  // if (workspace.getConfiguration("bloc").get<boolean>("checkForUpdates")) {
+  
+  // ntsukiqqv66yzv32hwxgeomoiv63tffr5ikwk6ufbzkx3cdnlyxa
   commands.registerCommand("onyxsio.new-feature", async (uri: Uri) => {
     mainCommand(uri);
+    
   });
 
   // commands.registerCommand("onyxsio.new-feature-cubit", async (uri: Uri) => {
@@ -308,7 +311,7 @@ export async function generateFeatureArchitecture (
   // Create the data layer
   const dataDirectoryPath = path.join(featureDirectoryPath, "Data");
   await createDirectories(dataDirectoryPath, [
-    "Datasources",
+    "Sources",
     "Models",
     "Repositories",
   ]);
@@ -575,7 +578,7 @@ const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
 			"Constants",
 			"Keys",
 			"Error",
-      "Network",
+      "Services",
 			"Routes",
 			"Theme",
 			"Utils",
@@ -603,7 +606,7 @@ const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
         ///
         createTemplateFile(CoreType.keys,coreDirectoryPath),
         createTemplateFile(CoreType.error,coreDirectoryPath),
-        createTemplateFile(CoreType.network,coreDirectoryPath),
+        createTemplateFile(CoreType.services,coreDirectoryPath),
         createTemplateFile(CoreType.routes,coreDirectoryPath),
         ///
         createTemplateFile(CoreType.routeName,coreDirectoryPath),
@@ -617,7 +620,7 @@ const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
         createTemplateFile(CoreType.middleware,coreDirectoryPath),
         createTemplateFile(CoreType.global,coreDirectoryPath),
         //
-        createMainFileTemplate(targetDirectory),
+        createMainFileTemplate(),
      
       ]);
 			window.showInformationMessage(`Successfully Generated Core Folder.`);
@@ -671,11 +674,12 @@ async function  createTemplateFile (type: CoreType, dir: string) {
       });
     }
 
-async function  createMainFileTemplate (dir: string) {
+async function  createMainFileTemplate () {
       
       // const targetPath = `${dir}/main.dart`;
 
       const targetPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/main.dart`);
+      const rootPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/re-name.dart`);
 
       if (!existsSync(targetPath)) {
         throw Error(`File is not find!`);
@@ -684,6 +688,18 @@ async function  createMainFileTemplate (dir: string) {
         writeFile(
           targetPath,
           getMainFileTemplate(),
+          "utf8",
+          (error) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(true);
+          }
+        );
+        writeFile(
+          rootPath,
+          getRootAppTemplate(),
           "utf8",
           (error) => {
             if (error) {
