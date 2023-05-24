@@ -17,7 +17,7 @@ function getEquatableCubitTemplate(cubitName: string) {
   const snakeCaseCubitName = changeCase.snakeCase(cubitName);
   const cubitState = `${pascalCaseCubitName}State`;
   return `
-  import 'package:bloc/bloc.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
   import 'package:equatable/equatable.dart';
   
   part '${snakeCaseCubitName}_state.dart';
@@ -33,7 +33,7 @@ function getDefaultCubitTemplate(cubitName: string) {
   const snakeCaseCubitName = changeCase.snakeCase(cubitName);
   const cubitState = `${pascalCaseCubitName}State`;
   return `
-  import 'package:bloc/bloc.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
   import 'package:meta/meta.dart';
 
   part '${snakeCaseCubitName}_state.dart';
@@ -49,7 +49,7 @@ export function getFreezedCubitTemplate(cubitName: string) {
   const snakeCaseCubitName = changeCase.snakeCase(cubitName);
   const cubitState = `${pascalCaseCubitName}State`;
   return `
-  import 'package:bloc/bloc.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
   import 'package:freezed_annotation/freezed_annotation.dart';
   
   part '${snakeCaseCubitName}_state.dart';

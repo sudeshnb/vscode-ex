@@ -18,7 +18,7 @@ function getEquatableBlocTemplate(blocName: string) {
   const blocState = `${pascalCaseBlocName}State`;
   const blocEvent = `${pascalCaseBlocName}Event`;
   return `
-  import 'package:bloc/bloc.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
   import 'package:equatable/equatable.dart';
   
   part '${snakeCaseBlocName}_event.dart';
@@ -40,7 +40,7 @@ function getDefaultBlocTemplate(blocName: string) {
   const blocState = `${pascalCaseBlocName}State`;
   const blocEvent = `${pascalCaseBlocName}Event`;
   return `
-  import 'package:bloc/bloc.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
   import 'package:meta/meta.dart';
   
   part '${snakeCaseBlocName}_event.dart';
@@ -62,7 +62,7 @@ export function getFreezedBlocTemplate(blocName: string) {
   const blocState = `${pascalCaseBlocName}State`;
   const blocEvent = `${pascalCaseBlocName}Event`;
   return `
-  import 'package:bloc/bloc.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
   import 'package:freezed_annotation/freezed_annotation.dart';
   
   part '${snakeCaseBlocName}_event.dart';

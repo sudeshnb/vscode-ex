@@ -1,9 +1,3 @@
-import { hasDependency } from "./has-dependency";
-
-
-const getx = "equatable";
-const bloc = "bloc";
-
 export const enum StateManagementType {
     simple,
     bloc,

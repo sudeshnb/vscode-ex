@@ -1,8 +1,8 @@
 {
-  "name": "onyxsio",
-  "displayName": "Clean Architecture",
+  "name": "sudesh",
+  "displayName": "Architecture",
   "description": "Folder Create with bloc, getx",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "license": "MIT",
   "pricing": "Free",
   "publisher": "sudeshbandara",
@@ -33,30 +33,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "onyxsio.new-feature",
+        "command": "sudesh.new-feature",
         "title": "New Feature: folder"
       },
       {
-        "command": "onyxsio.new-core",
+        "command": "sudesh.new-core",
         "title": "New Core: folder"
       }
     ]
   },
-  "menus": {
-    "explorer/context": [
-      {
-        "command": "onyxsio.new-feature",
-        "group": "cleanArchitectureGroup@1",
-        "when": "explorerResourceIsFolder"
-      },
-      {
-        "command": "onyxsio.new-core",
-        "title": "Hello cubit",
-        "when": "explorerResourceIsFolder"
-      }
-    ]
-  }
-,
+ 
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack",

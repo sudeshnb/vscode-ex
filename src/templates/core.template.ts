@@ -27,51 +27,49 @@ export const enum CoreType {
   export async function getTemplatePath(type: CoreType,dir: string) : Promise<string> {
     switch (type) {
         case CoreType.animation:
-            return `${dir}/Animation/animation.dart`;
+            return `${dir}/animation/animation.dart`;
         case CoreType.api:
-            return `${dir}/Api/api.dart`;
+            return `${dir}/api/api.dart`;
         case CoreType.config:
-            return `${dir}/Config/config.dart`;
+            return `${dir}/config/config.dart`;
         case CoreType.injection:
-            return `${dir}/Config/injection.dart`;
-        case CoreType.root:
-            return `${dir}/Config/root_app.dart`;
+            return `${dir}/config/injection.dart`;
         case CoreType.keyboard:
-            return `${dir}/Config/keyboard.dart`;
+            return `${dir}/config/keyboard.dart`;
         case CoreType.constants:
-            return `${dir}/Constants/constants.dart`;
+            return `${dir}/constants/constants.dart`;
         case CoreType.color:
-            return `${dir}/Constants/colors.dart`;
+            return `${dir}/constants/colors.dart`;
         case CoreType.icon:
-            return `${dir}/Constants/icons.dart`;
+            return `${dir}/constants/icons.dart`;
         case CoreType.textStyle:
-            return `${dir}/Constants/text_style.dart`;
+            return `${dir}/constants/text_style.dart`;
         case CoreType.keys:
-          return `${dir}/Keys/keys.dart`;
+          return `${dir}/keys/keys.dart`;
         case CoreType.error:
-            return `${dir}/Error/error.dart`;
+            return `${dir}/error/error.dart`;
         case CoreType.services:
-            return `${dir}/Services/services.dart`;
+            return `${dir}/services/services.dart`;
         case CoreType.routes:
-            return `${dir}/Routes/routes.dart`;
+            return `${dir}/routes/routes.dart`;
         case CoreType.routeName:
-            return `${dir}/Routes/names.dart`;
+            return `${dir}/routes/names.dart`;
         case CoreType.routePage:
-            return `${dir}/Routes/pages.dart`;
+            return `${dir}/routes/pages.dart`;
         case CoreType.theme:
-            return `${dir}/Theme/theme.dart`;
+            return `${dir}/theme/theme.dart`;
         case CoreType.utils:
-            return `${dir}/Utils/utils.dart`;
+            return `${dir}/utils/utils.dart`;
         case CoreType.usecases:
-            return `${dir}/Usecases/usecases.dart`;
+            return `${dir}/usecases/usecases.dart`;
         case CoreType.widgets:
-            return `${dir}/Widgets/widgets.dart`;
+            return `${dir}/widgets/widgets.dart`;
         case CoreType.localization:
-            return `${dir}/Localization/localization.dart`;
+            return `${dir}/localization/localization.dart`;
         case CoreType.middleware:
-            return `${dir}/Middleware/middleware.dart`;
+            return `${dir}/middleware/middleware.dart`;
         default:
-            return `${dir}/Global/global.dart`;
+            return `${dir}/global/global.dart`;
     }
 
 }
@@ -87,7 +85,7 @@ export async function getTemplate(type: CoreType): Promise<NodeJS.ArrayBufferVie
             return getApiTemplate();
         case CoreType.config:
             return getConfigTemplate();
-        case CoreType.config:
+        case CoreType.injection:
             return getInjectionTemplate();
         case CoreType.keyboard:
             return getKeyboardTemplate();
@@ -143,7 +141,6 @@ function getConfigTemplate(): NodeJS.ArrayBufferView | string {
     library config;
     export 'injection.dart';
     export 'keyboard.dart';
-    export 'root_app.dart';
     `;
   }
 // 
@@ -221,7 +218,9 @@ function getRoutePagesTemplate(): NodeJS.ArrayBufferView | string {
     import 'routes.dart';        
     class AppRoutePages {
         static const initial = AppRoutes.initial;
-        static final List routes = [];
+        static Map<String, WidgetBuilder> get routes => {
+            AppRoutes.initial: (context) => const WelcomeScreen(),
+        };
     }`;
   }
 //
@@ -251,7 +250,6 @@ function getColorTemplate(): NodeJS.ArrayBufferView | string {
 function getIconsTemplate(): NodeJS.ArrayBufferView | string {
     return ` 
     library app_icons;
-    import 'package:flutter/material.dart';
     class AppIcons {
 
         static const String opps = "assets/svg/opps.svg";
@@ -272,7 +270,7 @@ function getTextStyleTemplate(): NodeJS.ArrayBufferView | string {
         static FontWeight get b => FontWeight.w700;
     }
     // 
-    class class AppTextStyle extends TextStyle {
+    class AppTextStyle extends TextStyle {
 
         static TextStyle get header => TextStyle();
     }`;
@@ -317,12 +315,13 @@ export function getMainFileTemplate(): NodeJS.ArrayBufferView | string {
 //
 export function getRootAppTemplate(): NodeJS.ArrayBufferView | string {
     return ` 
-    import 'keyboard.dart';
+    import 'package:sudoku/src/Core/Config/config.dart';
     import 'package:flutter/material.dart';
+    import 'src/Core/Routes/routes.dart';
     import 'package:flutter_screenutil/flutter_screenutil.dart';
 
     class RootApp extends StatelessWidget {
-        RootApp({required this.child});
+        const RootApp({super.key});
       
         final Widget child;
       
@@ -332,7 +331,13 @@ export function getRootAppTemplate(): NodeJS.ArrayBufferView | string {
             designSize: const Size(360, 690),
             minTextAdapt: true,
             splitScreenMode: true,
-            builder: (context, ch) => DismissKeyboard(child: child),
+            builder: (context, ch) => const DismissKeyboard(
+                child: MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    initialRoute: AppRoutes.initial,
+                    routes: AppRoutePages.routes,
+                ),
+              ),
           );
         }
       }

@@ -7,14 +7,13 @@ import {
   commands,
   ExtensionContext,
   InputBoxOptions,
-  OpenDialogOptions,
   QuickPickOptions,
   Uri,
   window,
   workspace,
 } from "vscode";
 
-import { existsSync, lstatSync, writeFile, appendFile } from "fs";
+import { existsSync, lstatSync, writeFile } from "fs";
 import {
   getBlocEventTemplate,
   getBlocStateTemplate,
@@ -26,30 +25,22 @@ import {
   CoreType,
   getMainFileTemplate,
   getRootAppTemplate,
+  createGetxControllerTemplate,
 } from "./templates";
 import { analyzeDependencies } from "./utils";
 import { BlocType ,StateManagementType} from "./utils";
-import { type } from "os";
+
 
 
 export function activate (_context: ExtensionContext) {
-  // analyzeDependencies();
   analyzeDependencies();
-  // if (workspace.getConfiguration("bloc").get<boolean>("checkForUpdates")) {
-  
   // ntsukiqqv66yzv32hwxgeomoiv63tffr5ikwk6ufbzkx3cdnlyxa
-  commands.registerCommand("onyxsio.new-feature", async (uri: Uri) => {
+  commands.registerCommand("sudesh.new-feature", async (uri: Uri) => {
     mainCommand(uri);
     
   });
 
-  // commands.registerCommand("onyxsio.new-feature-cubit", async (uri: Uri) => {
-  //   mainCommand(uri, true);
-  // });
-  // commands.registerCommand("onyxsio.new-feature-getx", async (uri: Uri) => {
-  //   mainCommand(uri, true);
-  // });
-  commands.registerCommand("onyxsio.new-core", async (uri: Uri) => {
+  commands.registerCommand("sudesh.new-core", async (uri: Uri) => {
     core(uri);
   });
 }
@@ -128,11 +119,13 @@ export async function mainCommand (uri: Uri) {
 
  
  
-  const pascalCaseFeatureName = changeCase.pascalCase(featureName.toLowerCase()
-  );
+  const pascalCaseFeatureName = changeCase.pascalCase(featureName.toLowerCase());
+
+  const snakeCaseName = changeCase.snakeCase(featureName.toLowerCase());
   try {
     await generateFeatureArchitecture(
-      `${featureName}`,
+      // `${featureName}`,
+      `${snakeCaseName}`,
       targetDirectory,
       blocType,
       stateType
@@ -264,7 +257,7 @@ async function generateBlocCode (
   targetDirectory: string,
   type: BlocType
 ) {
-  const blocDirectoryPath = `${targetDirectory}/Bloc`;
+  const blocDirectoryPath = `${targetDirectory}/bloc`;
   if (!existsSync(blocDirectoryPath)) {
     await createDirectory(blocDirectoryPath);
   }
@@ -281,7 +274,7 @@ async function generateCubitCode (
   targetDirectory: string,
   type: BlocType
 ) {
-  const blocDirectoryPath = `${targetDirectory}/Cubit`;
+  const blocDirectoryPath = `${targetDirectory}/cubit`;
   if (!existsSync(blocDirectoryPath)) {
     await createDirectory(blocDirectoryPath);
   }
@@ -291,7 +284,19 @@ async function generateCubitCode (
     createCubitTemplate(blocName, targetDirectory, type),
   ]);
 }
+async function generateGetXCode (
+  getxName: string,
+  targetDirectory: string
+) {
+  const getxDirectoryPath = `${targetDirectory}/getX`;
+  if (!existsSync(getxDirectoryPath)) {
+    await createDirectory(getxDirectoryPath);
+  }
 
+  await Promise.all([
+    createGetxControllerTemplate(getxName, targetDirectory),
+  ]);
+}
 export async function generateFeatureArchitecture (
   featureName: string,
   targetDirectory: string,
@@ -309,31 +314,31 @@ export async function generateFeatureArchitecture (
   await createDirectory(featureDirectoryPath);
 
   // Create the data layer
-  const dataDirectoryPath = path.join(featureDirectoryPath, "Data");
+  const dataDirectoryPath = path.join(featureDirectoryPath, "data");
   await createDirectories(dataDirectoryPath, [
-    "Sources",
-    "Models",
-    "Repositories",
+    "sources",
+    "models",
+    "repositories",
   ]);
 
   // Create the domain layer
-  const domainDirectoryPath = path.join(featureDirectoryPath, "Domain");
+  const domainDirectoryPath = path.join(featureDirectoryPath, "domain");
   await createDirectories(domainDirectoryPath, [
-    "Entities",
-    "Repositories",
-    "Usecases",
+    "entities",
+    "contoller",
+    "usecases",
   ]);
 
   // Create the presentation layer
   const presentationDirectoryPath = path.join(
     featureDirectoryPath,
-    "Presentation"
+    "presentation"
   );
   const whatStateManagementType = await stateNameFind(state);
   await createDirectories(presentationDirectoryPath, [
     whatStateManagementType,
-    "Pages",
-    "Widgets",
+    "pages",
+    "widgets",
   ]);
     
   // Generate the bloc code in the presentation layer
@@ -343,7 +348,7 @@ export async function generateFeatureArchitecture (
     case StateManagementType.cubit:
       return await generateCubitCode(featureName, presentationDirectoryPath, type);
     case StateManagementType.getx:
-      return "GetX";
+      return await generateGetXCode(featureName, presentationDirectoryPath);
     default:
       return "";
   }
@@ -356,11 +361,11 @@ export async function generateFeatureArchitecture (
 async function stateNameFind(type:StateManagementType): Promise<string > {
   switch (type) {
     case StateManagementType.bloc:
-      return "Bloc";
+      return "bloc";
     case StateManagementType.cubit:
-      return "Cubit";
+      return "cubit";
     case StateManagementType.getx:
-      return "GetX";
+      return "getX";
     default:
       return "";
   }
@@ -379,10 +384,10 @@ export function getFeaturesDirectoryPath (currentDirectory: string): string {
 
   // Determines whether we're already in the features directory or not
   const isDirectoryAlreadyFeatures =
-    splitPath[splitPath.length - 1] === "Features";
+    splitPath[splitPath.length - 1] === "features";
 
   // If already return the current directory if not, return the current directory with the /features append to it
-  return isDirectoryAlreadyFeatures ? result : path.join(result, "Features");
+  return isDirectoryAlreadyFeatures ? result : path.join(result, "features");
 }
 
 export async function createDirectories (
@@ -417,7 +422,7 @@ function createBlocEventTemplate (
   type: BlocType
 ) {
   const snakeCaseBlocName = changeCase.snakeCase(blocName.toLowerCase());
-  const targetPath = `${targetDirectory}/Bloc/${snakeCaseBlocName}_event.dart`;
+  const targetPath = `${targetDirectory}/bloc/${snakeCaseBlocName}_event.dart`;
   if (existsSync(targetPath)) {
     throw Error(`${snakeCaseBlocName}_event.dart already exists`);
   }
@@ -443,7 +448,7 @@ function createBlocStateTemplate (
   type: BlocType
 ) {
   const snakeCaseBlocName = changeCase.snakeCase(blocName.toLowerCase());
-  const targetPath = `${targetDirectory}/Bloc/${snakeCaseBlocName}_state.dart`;
+  const targetPath = `${targetDirectory}/bloc/${snakeCaseBlocName}_state.dart`;
   if (existsSync(targetPath)) {
     throw Error(`${snakeCaseBlocName}_state.dart already exists`);
   }
@@ -469,7 +474,7 @@ function createBlocTemplate (
   type: BlocType
 ) {
   const snakeCaseBlocName = changeCase.snakeCase(blocName.toLowerCase());
-  const targetPath = `${targetDirectory}/Bloc/${snakeCaseBlocName}_bloc.dart`;
+  const targetPath = `${targetDirectory}/bloc/${snakeCaseBlocName}_bloc.dart`;
   if (existsSync(targetPath)) {
     throw Error(`${snakeCaseBlocName}_bloc.dart already exists`);
   }
@@ -495,7 +500,7 @@ function createCubitStateTemplate (
   type: BlocType
 ) {
   const snakeCaseBlocName = changeCase.snakeCase(blocName.toLowerCase());
-  const targetPath = `${targetDirectory}/Cubit/${snakeCaseBlocName}_state.dart`;
+  const targetPath = `${targetDirectory}/cubit/${snakeCaseBlocName}_state.dart`;
   if (existsSync(targetPath)) {
     throw Error(`${snakeCaseBlocName}_state.dart already exists`);
   }
@@ -521,7 +526,7 @@ function createCubitTemplate (
   type: BlocType
 ) {
   const snakeCaseBlocName = changeCase.snakeCase(blocName.toLowerCase());
-  const targetPath = `${targetDirectory}/Cubit/${snakeCaseBlocName}_cubit.dart`;
+  const targetPath = `${targetDirectory}/cubit/${snakeCaseBlocName}_cubit.dart`;
   if (existsSync(targetPath)) {
     throw Error(`${snakeCaseBlocName}_cubit.dart already exists`);
   }
@@ -552,7 +557,7 @@ export async function core (uri: Uri) {
     targetDirectory = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/src`);
 
   } catch (error) {
-    window.showErrorMessage(`error.message ${error}`);
+    window.showErrorMessage(`error: ${error}`);
   }
   try {
     await generateCoreArchitecture(targetDirectory);
@@ -572,21 +577,21 @@ const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
 
 		if (!existsSync(coreDirectoryPath)) {
 		await createDirectories(coreDirectoryPath, [
-			"Animation",
-			"Api",
-			"Config",
-			"Constants",
-			"Keys",
-			"Error",
-      "Services",
-			"Routes",
-			"Theme",
-			"Utils",
-			"Usecases",
-			"Widgets",
-			"Localization",
-			"Middleware",
-      'Global'
+			"animation",
+			"api",
+			"config",
+			"constants",
+			"keys",
+			"error",
+      "services",
+			"routes",
+			"theme",
+			"utils",
+			"usecases",
+			"widgets",
+			"localization",
+			"middleware",
+      'global'
 			]);	
       await Promise.all([
         // createRoutesTemplate(coreDirectoryPath),
@@ -596,7 +601,7 @@ const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
         /// 
         createTemplateFile(CoreType.injection,coreDirectoryPath),
         createTemplateFile(CoreType.keyboard,coreDirectoryPath),
-        createTemplateFile(CoreType.root,coreDirectoryPath),
+        // createTemplateFile(CoreType.root,coreDirectoryPath),
         ///
         createTemplateFile(CoreType.constants,coreDirectoryPath),
         ///
@@ -643,7 +648,7 @@ export function getCoreDirectoryPath (currentDirectory: string): string {
     const result = splitPath.join(path.sep);
     
     // If already return the current directory if not, return the current directory with the /features append to it
-    return  path.join(result, "Core");
+    return  path.join(result, "core");
     }
 
 

@@ -4,3 +4,4 @@ export * from "./bloc.template";
 export * from "./cubit-state.template";
 export * from "./cubit.template";
 export * from "./core.template";
+export * from "./getx.template";
