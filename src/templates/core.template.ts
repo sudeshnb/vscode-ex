@@ -158,7 +158,14 @@ function getKeysTemplate(): NodeJS.ArrayBufferView | string {
   }
 // 
 function getErrorTemplate(): NodeJS.ArrayBufferView | string {
-    return `library error;`;
+    return `library error;
+    class RouteException implements Exception {
+  final String message;
+
+  const RouteException(this.message);
+}
+    
+    `;
   }
 // 
 function getNetworkTemplate(): NodeJS.ArrayBufferView | string {
@@ -205,22 +212,32 @@ function getRoutesTemplate(): NodeJS.ArrayBufferView | string {
 function getRouteNamesTemplate(): NodeJS.ArrayBufferView | string {
     return ` 
     library route_names;
-    class AppRoutes {
+    class RoutesName {
         static const initial = '/';
         static const home = '/home';
-        static const login = '/login';
     }`;
   }
 //   
 function getRoutePagesTemplate(): NodeJS.ArrayBufferView | string {
     return `
     library route_pages;
+    import 'package:flutter/material.dart';
+    import '/src/core/error/error.dart';
+    import '/src/core/animation/animation.dart';
     import 'routes.dart';        
-    class AppRoutePages {
-        static const initial = AppRoutes.initial;
-        static Map<String, WidgetBuilder> get routes => {
-            AppRoutes.initial: (context) => const WelcomeScreen(),
-        };
+    class AppRoute {
+        static const initial = RoutesName.initial;
+        static Route<dynamic> generate(RouteSettings? settings) {
+            switch (settings?.name) {
+     
+      case RoutesName.initial:
+         // return const PageFadeTransition(child: HomePage()).build;
+
+      default:
+        // If there is no such named route in the switch statement
+        throw const RouteException('Route not found!');
+    }
+        }
     }`;
   }
 //
@@ -302,8 +319,10 @@ function getKeyboardTemplate(): NodeJS.ArrayBufferView | string {
 //
 export function getMainFileTemplate(): NodeJS.ArrayBufferView | string {
     return ` 
-    import 'src/Core/Config/config.dart';
+    import 'src/core/config/config.dart';
     import 'package:flutter/material.dart';
+    import 're_name.dart';
+
     Future<void> main() async {
         //  Here we are calling the Dependency Injection
         await DependencyInjection.init();
@@ -315,15 +334,14 @@ export function getMainFileTemplate(): NodeJS.ArrayBufferView | string {
 //
 export function getRootAppTemplate(): NodeJS.ArrayBufferView | string {
     return ` 
-    import 'package:sudoku/src/Core/Config/config.dart';
+    import 'src/core/config/config.dart';
     import 'package:flutter/material.dart';
-    import 'src/Core/Routes/routes.dart';
+    import 'src/core/routes/routes.dart';
     import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+    
     class RootApp extends StatelessWidget {
         const RootApp({super.key});
-      
-        final Widget child;
       
         @override
         Widget build(BuildContext context) {
@@ -334,8 +352,8 @@ export function getRootAppTemplate(): NodeJS.ArrayBufferView | string {
             builder: (context, ch) => const DismissKeyboard(
                 child: MaterialApp(
                     debugShowCheckedModeBanner: false,
-                    initialRoute: AppRoutes.initial,
-                    routes: AppRoutePages.routes,
+                    initialRoute: RoutesName.initial,
+                    onGenerateRoute: AppRoute.generate,
                 ),
               ),
           );

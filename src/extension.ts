@@ -11,6 +11,9 @@ import {
   Uri,
   window,
   workspace,
+  languages,
+  CodeActionKind,
+  
 } from "vscode";
 
 import { existsSync, lstatSync, writeFile } from "fs";
@@ -30,6 +33,7 @@ import {
 import { analyzeDependencies } from "./utils";
 import { BlocType ,StateManagementType} from "./utils";
 
+import  * as s from "./class_generator";
 
 
 export function activate (_context: ExtensionContext) {
@@ -43,6 +47,25 @@ export function activate (_context: ExtensionContext) {
   commands.registerCommand("sudesh.new-core", async (uri: Uri) => {
     core(uri);
   });
+  ///
+  _context.subscriptions.push(
+    commands.registerCommand('sudesh.props',s.generateDataClass
+    ));
+  ///
+  _context.subscriptions.push(
+    commands.registerCommand('sudesh.json',s.generateJsonDataClass
+      ));
+  //
+  _context.subscriptions.push(languages.registerCodeActionsProvider({
+      language: 'dart',
+      scheme: 'file'
+    },(new s.DataClassCodeActions()),  {
+      providedCodeActionKinds: [
+        CodeActionKind.QuickFix
+      ],
+    }));
+    //
+    s.findProjectName();
 }
 
 // GETx
@@ -87,12 +110,6 @@ export async function getxCommand (uri: Uri) {
     );
   }
 }
-
-
-
-
-
-
 
 export async function mainCommand (uri: Uri) {
   // Show feature prompt
@@ -206,21 +223,6 @@ export async function promptForUseStateManagement ():  Promise<StateManagementTy
       return StateManagementType.simple;
   }
 }
-// export async function promptForTargetDirectory (): Promise<string | undefined> {
-//   const options: OpenDialogOptions = {
-//     canSelectMany: false,
-//     openLabel: "Select a folder to create the feature in",
-//     canSelectFolders: true,
-//   };
-
-//   return window.showOpenDialog(options).then((uri) => {
-//     if (_.isNil(uri) || _.isEmpty(uri)) {
-//       return undefined;
-//     }
-//     return uri[0].fsPath;
-//   });
-// }
-
 export function promptForFeatureName (): Thenable<string | undefined> {
   const blocNamePromptOptions: InputBoxOptions = {
     prompt: "Feature Name",
@@ -545,8 +547,6 @@ function createCubitTemplate (
     );
   });
 }
-///
-
 
 export async function core (uri: Uri) {
 	// Abort if name is not valid
@@ -651,9 +651,6 @@ export function getCoreDirectoryPath (currentDirectory: string): string {
     return  path.join(result, "core");
     }
 
-
-
-
 async function  createTemplateFile (type: CoreType, dir: string) {
       
       const targetDir = await getTemplatePath(type,dir);
@@ -684,7 +681,7 @@ async function  createMainFileTemplate () {
       // const targetPath = `${dir}/main.dart`;
 
       const targetPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/main.dart`);
-      const rootPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/re-name.dart`);
+      const rootPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/re_name.dart`);
 
       if (!existsSync(targetPath)) {
         throw Error(`File is not find!`);
