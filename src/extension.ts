@@ -47,6 +47,10 @@ export function activate (_context: ExtensionContext) {
   commands.registerCommand("sudesh.new-core", async (uri: Uri) => {
     core(uri);
   });
+
+  commands.registerCommand("sudesh.package", async (uri: Uri) => {
+    packageFolder(uri);
+  });
   ///
   _context.subscriptions.push(
     commands.registerCommand('sudesh.props',s.generateDataClass
@@ -714,3 +718,92 @@ async function  createMainFileTemplate () {
       });
     }
 
+///
+
+export async function packageFolder (uri: Uri) {
+	// Abort if name is not valid
+	let targetDirectory = "";
+  try {
+    // targetDirectory = await getTargetDirectory(uri);
+    // window.showInformationMessage(workspace.workspaceFolders?.find);
+    targetDirectory = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/packages`);
+
+  } catch (error) {
+    window.showErrorMessage(`error: ${error}`);
+  }
+  try {
+    await generatePackageArchitecture(targetDirectory);
+    
+  } catch (error) {
+    window.showErrorMessage(
+      `Error:
+        ${error instanceof Error ? error.message : JSON.stringify(error)}`
+    );
+  }
+}
+export function getPackagesDirectoryPath (currentDirectory: string): string {
+  // Split the path
+  const splitPath = currentDirectory.split(path.sep);
+  // Remove trailing \
+  if (splitPath[splitPath.length - 1] === "") {
+    splitPath.pop();
+  }
+  // Rebuild path
+  const result = splitPath.join(path.sep);
+  
+  // If already return the current directory if not, return the current directory with the /features append to it
+  return  path.join(result, "packages");
+  }
+export async function generatePackageArchitecture (targetDirectory: string) {
+
+  // Create the features directory if its does not exist yet
+  const packageDirectoryPath = getPackagesDirectoryPath(targetDirectory);
+  
+      if (!existsSync(packageDirectoryPath)) {
+      await createDirectories(packageDirectoryPath, [
+        "auth",
+        "config",
+        'onyxsio'
+        ]);	
+        await Promise.all([
+          // createRoutesTemplate(coreDirectoryPath),
+          // createPackagesTemplateFile(CoreType.animation,coreDirectoryPath),
+          // createPackagesTemplateFile(CoreType.api,coreDirectoryPath),
+          // createPackagesTemplateFile(CoreType.config,coreDirectoryPath),
+          //
+          createMainFileTemplate(),
+       
+        ]);
+        window.showInformationMessage(`Successfully Generated Core Folder.`);
+      }
+      else{
+        window.showErrorMessage(`Error: Already Generated Core Folder!.`);
+        return;
+      }
+    
+    }
+
+    async function  createPackagesTemplateFile (type: CoreType, dir: string) {
+      
+      const targetDir = await getTemplatePath(type,dir);
+
+      const data = await getTemplate(type);
+
+      if (existsSync(targetDir)) {
+        throw Error(`File already exists`);
+      }
+      return new Promise(async (resolve, reject) => {
+        writeFile(
+          targetDir,
+          data,
+          "utf8",
+          (error) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(true);
+          }
+        );
+      });
+    }

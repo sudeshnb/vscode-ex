@@ -2,7 +2,7 @@
   "name": "sudesh",
   "displayName": "Architecture",
   "description": "Folder Create with bloc, getx, Create dart data classes easily, fast and without writing boilerplate or running code generation.",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "license": "MIT",
   "pricing": "Free",
   "publisher": "sudeshbandara",
@@ -10,6 +10,7 @@
     "type": "git",
     "url": "https://github.com/sudeshnb/vscode-ex.git"
   },
+  "icon": "assets/logo.png",
   "homepage": "https://sudeshnb.xyz",
   "engines": {
     "vscode": "^1.78.0"
