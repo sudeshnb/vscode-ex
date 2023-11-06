@@ -29,6 +29,7 @@ import {
   getMainFileTemplate,
   getRootAppTemplate,
   createGetxControllerTemplate,
+  getFeaturesTemplate,
 } from "./templates";
 import { analyzeDependencies } from "./utils";
 import { BlocType ,StateManagementType} from "./utils";
@@ -324,16 +325,16 @@ export async function generateFeatureArchitecture (
   await createDirectories(dataDirectoryPath, [
     "sources",
     "models",
-    "repositories",
-  ]);
+    "implements",
+  ],featureName);
 
   // Create the domain layer
   const domainDirectoryPath = path.join(featureDirectoryPath, "domain");
   await createDirectories(domainDirectoryPath, [
     "entities",
-    "contoller",
+    "repositories",
     "usecases",
-  ]);
+  ],featureName);
 
   // Create the presentation layer
   const presentationDirectoryPath = path.join(
@@ -345,7 +346,7 @@ export async function generateFeatureArchitecture (
     whatStateManagementType,
     "pages",
     "widgets",
-  ]);
+  ],featureName);
     
   // Generate the bloc code in the presentation layer
   switch (state) {
@@ -398,14 +399,33 @@ export function getFeaturesDirectoryPath (currentDirectory: string): string {
 
 export async function createDirectories (
   targetDirectory: string,
-  childDirectories: string[]
+  childDirectories: string[],
+  featureName: string,
 ): Promise<void> {
   // Create the parent directory
   await createDirectory(targetDirectory);
   // Creat the children
   childDirectories.map(
     async (directory) =>
-      await createDirectory(path.join(targetDirectory, directory))
+     { await createDirectory(path.join(targetDirectory, directory));
+
+      if(directory != ""){
+      createFeatureTemplate(directory,path.join(targetDirectory, directory),featureName);}
+    }
+  );
+}
+export async function createCoreDirectories (
+  targetDirectory: string,
+  childDirectories: string[],
+  
+): Promise<void> {
+  // Create the parent directory
+  await createDirectory(targetDirectory);
+  // Creat the children
+  childDirectories.map(
+    async (directory) =>
+     { await createDirectory(path.join(targetDirectory, directory));
+    }
   );
 }
 
@@ -419,6 +439,33 @@ function createDirectory (targetDirectory: string): Promise<void> {
       resolve();
     });
   
+  });
+}
+
+async function createFeatureTemplate (
+  blocName: string,
+  targetDirectory: string,
+  featureName: string,
+) {
+  const snakeCaseBlocName = changeCase.snakeCase(blocName.toLowerCase());
+  const targetPath = `${targetDirectory}/${snakeCaseBlocName}.dart`;
+  const data = await getFeaturesTemplate(snakeCaseBlocName,featureName);
+  if (existsSync(targetPath)) {
+    throw Error(`${snakeCaseBlocName}.dart already exists`);
+  }
+  return new Promise(async (resolve, reject) => {
+    writeFile(
+      targetPath,
+      data,
+      "utf8",
+      (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(true);
+      }
+    );
   });
 }
 
@@ -580,7 +627,7 @@ export async function generateCoreArchitecture (targetDirectory: string) {
 const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
 
 		if (!existsSync(coreDirectoryPath)) {
-		await createDirectories(coreDirectoryPath, [
+		await createCoreDirectories(coreDirectoryPath, [
 			"animation",
 			"api",
 			"config",
@@ -760,7 +807,7 @@ export async function generatePackageArchitecture (targetDirectory: string) {
   const packageDirectoryPath = getPackagesDirectoryPath(targetDirectory);
   
       if (!existsSync(packageDirectoryPath)) {
-      await createDirectories(packageDirectoryPath, [
+      await createCoreDirectories(packageDirectoryPath, [
         "auth",
         "config",
         'onyxsio'
@@ -783,7 +830,7 @@ export async function generatePackageArchitecture (targetDirectory: string) {
     
     }
 
-    async function  createPackagesTemplateFile (type: CoreType, dir: string) {
+async function  createPackagesTemplateFile (type: CoreType, dir: string) {
       
       const targetDir = await getTemplatePath(type,dir);
 
