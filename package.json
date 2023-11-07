@@ -1,8 +1,8 @@
 {
   "name": "sudesh",
-  "displayName": "Architecture",
-  "description": "Folder Create with bloc, getx, Create dart data classes easily, fast and without writing boilerplate or running code generation.",
-  "version": "1.0.7",
+  "displayName": "Clean Flutter Architecture",
+  "description": "Folder Create with Bloc, Getx, and Provider, Create dart data classes easily and quickly without writing boilerplate or running code generation.",
+  "version": "1.0.9",
   "license": "MIT",
   "pricing": "Free",
   "publisher": "sudeshbandara",
@@ -23,6 +23,7 @@
     "dart",
     "flutter",
     "angulardart",
+    "getx",
     "bloc",
     "state-management"
   ],
