@@ -61,7 +61,9 @@ function getModelsTemplate(value:String): NodeJS.ArrayBufferView | string {
 function getDataRepositoriesTemplate(value:String): NodeJS.ArrayBufferView | string {
     return `
     import '../sources/sources.dart';
-    class ${value}RepositoryImp {
+    import '../../domain/repositories/repositories.dart';
+    
+    class ${value}RepositoryImp implements ${value}Repository{
 
         final ${value}RemoteDataSource remoteDataSource;
         ${value}RepositoryImp({required this.remoteDataSource});
