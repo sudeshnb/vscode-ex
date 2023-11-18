@@ -40,25 +40,25 @@ import  * as s from "./class_generator";
 export function activate (_context: ExtensionContext) {
   analyzeDependencies();
   // ntsukiqqv66yzv32hwxgeomoiv63tffr5ikwk6ufbzkx3cdnlyxa
-  commands.registerCommand("sudesh.new-feature", async (uri: Uri) => {
+  commands.registerCommand("onyxsio.new-feature", async (uri: Uri) => {
     mainCommand(uri);
     
   });
 
-  commands.registerCommand("sudesh.new-core", async (uri: Uri) => {
+  commands.registerCommand("onyxsio.new-core", async (uri: Uri) => {
     core(uri);
   });
 
-  commands.registerCommand("sudesh.package", async (uri: Uri) => {
+  commands.registerCommand("onyxsio.package", async (uri: Uri) => {
     packageFolder(uri);
   });
   ///
   _context.subscriptions.push(
-    commands.registerCommand('sudesh.props',s.generateDataClass
+    commands.registerCommand('onyxsio.props',s.generateDataClass
     ));
   ///
   _context.subscriptions.push(
-    commands.registerCommand('sudesh.json',s.generateJsonDataClass
+    commands.registerCommand('onyxsio.json',s.generateJsonDataClass
       ));
   //
   _context.subscriptions.push(languages.registerCodeActionsProvider({

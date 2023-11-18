@@ -28,30 +28,30 @@
     "state-management"
   ],
   "activationEvents": [
-    "onCommand:sudesh.new-bloc",
+    "onCommand:onyxsio.new-bloc",
     "workspaceContains:**/pubspec.yaml",
     "onLanguage:dart",
-    "onCommand:sudesh.generate.from_props",
-    "onCommand:sudesh.generate.from_json"
+    "onCommand:onyxsio.generate.from_props",
+    "onCommand:onyxsio.generate.from_json"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "sudesh.new-feature",
+        "command": "onyxsio.new-feature",
         "title": "Onyxsio : Generator feature folder"
       },
       {
-        "command": "sudesh.new-core",
+        "command": "onyxsio.new-core",
         "title": "Onyxsio : Generator core folder"
       },
       {
         "title": "Onyxsio : Generate from class properties",
-        "command": "sudesh.props"
+        "command": "onyxsio.props"
       },
       {
         "title": "Onyxsio : Generate from JSON",
-        "command": "sudesh.json"
+        "command": "onyxsio.json"
       }
     ],
     "configuration": [
