@@ -2,13 +2,16 @@
   "name": "sudesh",
   "displayName": "Clean Flutter Architecture",
   "description": "Folder Create with Bloc, Getx, and Provider, Create dart data classes easily and quickly without writing boilerplate or running code generation.",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "license": "MIT",
   "pricing": "Free",
   "publisher": "sudeshbandara",
   "repository": {
     "type": "git",
     "url": "https://github.com/sudeshnb/vscode-ex.git"
+  },
+  "sponsor": {
+    "url": "https://github.com/sponsors/sudeshnb"
   },
   "icon": "assets/logo.png",
   "homepage": "https://sudeshnb.xyz",
@@ -37,6 +40,11 @@
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
+      
+      {
+        "command": "onyxsio.flavors",
+        "title": "Onyxsio : Generator flavors folder"
+      },
       {
         "command": "onyxsio.new-feature",
         "title": "Onyxsio : Generator feature folder"

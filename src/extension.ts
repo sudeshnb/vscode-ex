@@ -36,21 +36,28 @@ import { BlocType ,StateManagementType} from "./utils";
 
 import  * as s from "./class_generator";
 
+import  {appendFlavors} from "./flavors";
+
+
 
 export function activate (_context: ExtensionContext) {
   analyzeDependencies();
   // ntsukiqqv66yzv32hwxgeomoiv63tffr5ikwk6ufbzkx3cdnlyxa
+  commands.registerCommand("onyxsio.flavors", async (uri: Uri) => {
+    flavorsCommand();
+    
+  });
   commands.registerCommand("onyxsio.new-feature", async (uri: Uri) => {
     mainCommand(uri);
     
   });
 
   commands.registerCommand("onyxsio.new-core", async (uri: Uri) => {
-    core(uri);
+    core();
   });
 
   commands.registerCommand("onyxsio.package", async (uri: Uri) => {
-    packageFolder(uri);
+    packageFolder();
   });
   ///
   _context.subscriptions.push(
@@ -598,13 +605,44 @@ function createCubitTemplate (
     );
   });
 }
+export async function flavorsCommand () {
+	// Abort if name is not valid
+	let libDir = "";
+	let iOSDir = "";
+	let androidDir = "";
 
-export async function core (uri: Uri) {
+
+  try {
+    // targetDirectory = await getTargetDirectory(uri);
+    var fsPath=workspace.workspaceFolders![0].uri.fsPath;
+  
+    libDir = path.join(`${fsPath}/lib`);
+    androidDir = path.join(`${fsPath}/android/app/src`);
+    iOSDir = path.join(`${fsPath}/ios/config`);
+
+
+  } catch (error) {
+    window.showErrorMessage(`error: ${error}`);
+  }
+  try {
+
+    await appendFlavors();
+    // await generateFlavorArchitecture(targetiOSDirectory);
+    // await generateFlavorArchitecture(targetAndroidDirectory);
+    // await generateFlavorArchitecture(targetLibDirectory);
+    
+  } catch (error) {
+    window.showErrorMessage(
+      `Error:
+        ${error instanceof Error ? error.message : JSON.stringify(error)}`
+    );
+  }
+}
+export async function core () {
 	// Abort if name is not valid
 	let targetDirectory = "";
   try {
-    // targetDirectory = await getTargetDirectory(uri);
-    // window.showInformationMessage(workspace.workspaceFolders?.find);
+    
     targetDirectory = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/src`);
 
   } catch (error) {
@@ -615,19 +653,36 @@ export async function core (uri: Uri) {
     
   } catch (error) {
     window.showErrorMessage(
-      `Error:
-        ${error instanceof Error ? error.message : JSON.stringify(error)}`
+      `Error: ${error instanceof Error ? error.message : JSON.stringify(error)}`
     );
   }
 }
 
-export async function generateCoreArchitecture (targetDirectory: string) {
+ async function generateFlavorArchitecture (targetDir: string) {
+
+  // Create the features directory if its does not exist yet
+  const dirPath = checkDirectoryPath(targetDir,"");
+  
+      if (!existsSync(dirPath)) {
+
+      await createCoreDirectories(dirPath, ["development","staging","production"]);	
+      
+        window.showInformationMessage(`Successfully Generated Flavors Folder.`);
+      }
+      else{
+        window.showErrorMessage(`Error: Already Generated Flavors Folder!.`);
+        // return;
+      }
+    
+}
+
+async function generateCoreArchitecture (targetDir: string) {
 
 // Create the features directory if its does not exist yet
-const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
+const coreDirPath = checkDirectoryPath(targetDir, "core");
 
-		if (!existsSync(coreDirectoryPath)) {
-		await createCoreDirectories(coreDirectoryPath, [
+		if (!existsSync(coreDirPath)) {
+		await createCoreDirectories(coreDirPath, [
 			"animation",
 			"api",
 			"config",
@@ -644,37 +699,33 @@ const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
 			"middleware",
       'global'
 			]);	
+      
       await Promise.all([
-        // createRoutesTemplate(coreDirectoryPath),
-        createTemplateFile(CoreType.animation,coreDirectoryPath),
-        createTemplateFile(CoreType.api,coreDirectoryPath),
-        createTemplateFile(CoreType.config,coreDirectoryPath),
-        /// 
-        createTemplateFile(CoreType.injection,coreDirectoryPath),
-        createTemplateFile(CoreType.keyboard,coreDirectoryPath),
-        // createTemplateFile(CoreType.root,coreDirectoryPath),
+       
+        createTemplateFile(CoreType.animation,coreDirPath),
+        createTemplateFile(CoreType.api,coreDirPath),
+        createTemplateFile(CoreType.config,coreDirPath),
+        createTemplateFile(CoreType.injection,coreDirPath),
+        createTemplateFile(CoreType.keyboard,coreDirPath),
+        createTemplateFile(CoreType.constants,coreDirPath),
+        createTemplateFile(CoreType.color,coreDirPath),
+        createTemplateFile(CoreType.icon,coreDirPath),
+        createTemplateFile(CoreType.textStyle,coreDirPath),
+        createTemplateFile(CoreType.keys,coreDirPath),
+        createTemplateFile(CoreType.error,coreDirPath),
+        createTemplateFile(CoreType.services,coreDirPath),
+        createTemplateFile(CoreType.routes,coreDirPath),
         ///
-        createTemplateFile(CoreType.constants,coreDirectoryPath),
+        createTemplateFile(CoreType.routeName,coreDirPath),
+        createTemplateFile(CoreType.routePage,coreDirPath),
         ///
-        createTemplateFile(CoreType.color,coreDirectoryPath),
-        createTemplateFile(CoreType.icon,coreDirectoryPath),
-        createTemplateFile(CoreType.textStyle,coreDirectoryPath),
-        ///
-        createTemplateFile(CoreType.keys,coreDirectoryPath),
-        createTemplateFile(CoreType.error,coreDirectoryPath),
-        createTemplateFile(CoreType.services,coreDirectoryPath),
-        createTemplateFile(CoreType.routes,coreDirectoryPath),
-        ///
-        createTemplateFile(CoreType.routeName,coreDirectoryPath),
-        createTemplateFile(CoreType.routePage,coreDirectoryPath),
-        ///
-        createTemplateFile(CoreType.theme,coreDirectoryPath),
-        createTemplateFile(CoreType.usecases,coreDirectoryPath),
-        createTemplateFile(CoreType.utils,coreDirectoryPath),
-        createTemplateFile(CoreType.widgets,coreDirectoryPath),
-        createTemplateFile(CoreType.localization,coreDirectoryPath),
-        createTemplateFile(CoreType.middleware,coreDirectoryPath),
-        createTemplateFile(CoreType.global,coreDirectoryPath),
+        createTemplateFile(CoreType.theme,coreDirPath),
+        createTemplateFile(CoreType.usecases,coreDirPath),
+        createTemplateFile(CoreType.utils,coreDirPath),
+        createTemplateFile(CoreType.widgets,coreDirPath),
+        createTemplateFile(CoreType.localization,coreDirPath),
+        createTemplateFile(CoreType.middleware,coreDirPath),
+        createTemplateFile(CoreType.global,coreDirPath),
         //
         createMainFileTemplate(),
      
@@ -688,19 +739,6 @@ const coreDirectoryPath = getCoreDirectoryPath(targetDirectory);
 	
   }
 
-export function getCoreDirectoryPath (currentDirectory: string): string {
-    // Split the path
-    const splitPath = currentDirectory.split(path.sep);
-    // Remove trailing \
-    if (splitPath[splitPath.length - 1] === "") {
-      splitPath.pop();
-    }
-    // Rebuild path
-    const result = splitPath.join(path.sep);
-    
-    // If already return the current directory if not, return the current directory with the /features append to it
-    return  path.join(result, "core");
-    }
 
 async function  createTemplateFile (type: CoreType, dir: string) {
       
@@ -729,10 +767,9 @@ async function  createTemplateFile (type: CoreType, dir: string) {
 
 async function  createMainFileTemplate () {
       
-      // const targetPath = `${dir}/main.dart`;
-
-      const targetPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/main.dart`);
-      const rootPath  = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/lib/re_name.dart`);
+      const fsPath = workspace.workspaceFolders![0].uri.fsPath;
+      const targetPath  = path.join(`${fsPath}/lib/main.dart`);
+      const rootPath  = path.join(`${fsPath}/lib/re_name.dart`);
 
       if (!existsSync(targetPath)) {
         throw Error(`File is not find!`);
@@ -767,12 +804,11 @@ async function  createMainFileTemplate () {
 
 ///
 
-export async function packageFolder (uri: Uri) {
+export async function packageFolder () {
 	// Abort if name is not valid
 	let targetDirectory = "";
   try {
-    // targetDirectory = await getTargetDirectory(uri);
-    // window.showInformationMessage(workspace.workspaceFolders?.find);
+  
     targetDirectory = path.join(`${workspace.workspaceFolders![0].uri.fsPath}/packages`);
 
   } catch (error) {
@@ -788,39 +824,20 @@ export async function packageFolder (uri: Uri) {
     );
   }
 }
-export function getPackagesDirectoryPath (currentDirectory: string): string {
-  // Split the path
-  const splitPath = currentDirectory.split(path.sep);
-  // Remove trailing \
-  if (splitPath[splitPath.length - 1] === "") {
-    splitPath.pop();
-  }
-  // Rebuild path
-  const result = splitPath.join(path.sep);
-  
-  // If already return the current directory if not, return the current directory with the /features append to it
-  return  path.join(result, "packages");
-  }
-export async function generatePackageArchitecture (targetDirectory: string) {
+
+
+async function generatePackageArchitecture (targetDir: string) {
 
   // Create the features directory if its does not exist yet
-  const packageDirectoryPath = getPackagesDirectoryPath(targetDirectory);
+  const packageDirPath = checkDirectoryPath(targetDir, "packages");
   
-      if (!existsSync(packageDirectoryPath)) {
-      await createCoreDirectories(packageDirectoryPath, [
+      if (!existsSync(packageDirPath)) {
+      await createCoreDirectories(packageDirPath, [
         "auth",
         "config",
         'onyxsio'
         ]);	
-        await Promise.all([
-          // createRoutesTemplate(coreDirectoryPath),
-          // createPackagesTemplateFile(CoreType.animation,coreDirectoryPath),
-          // createPackagesTemplateFile(CoreType.api,coreDirectoryPath),
-          // createPackagesTemplateFile(CoreType.config,coreDirectoryPath),
-          //
-          createMainFileTemplate(),
-       
-        ]);
+        await Promise.all([createMainFileTemplate()]);
         window.showInformationMessage(`Successfully Generated Core Folder.`);
       }
       else{
@@ -830,27 +847,16 @@ export async function generatePackageArchitecture (targetDirectory: string) {
     
     }
 
-async function  createPackagesTemplateFile (type: CoreType, dir: string) {
-      
-      const targetDir = await getTemplatePath(type,dir);
 
-      const data = await getTemplate(type);
-
-      if (existsSync(targetDir)) {
-        throw Error(`File already exists`);
+    function checkDirectoryPath (dir: string,p: string): string {
+      // Split the path
+      const splitPath = dir.split(path.sep);
+      // Remove trailing \
+      if (splitPath[splitPath.length - 1] === "") {
+        splitPath.pop();
       }
-      return new Promise(async (resolve, reject) => {
-        writeFile(
-          targetDir,
-          data,
-          "utf8",
-          (error) => {
-            if (error) {
-              reject(error);
-              return;
-            }
-            resolve(true);
-          }
-        );
-      });
+      // Rebuild path
+      const result = splitPath.join(path.sep);
+      // If already return the current directory if not, return the current directory with append to it
+      return  path.join(result, p);
     }
